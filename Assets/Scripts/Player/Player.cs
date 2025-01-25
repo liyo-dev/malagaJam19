@@ -1,14 +1,18 @@
 using TMPro;
 using UnityEngine;
-using Utils;
-using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class Player : MonoBehaviour
 {
-    //public int maxHealth = 6;
     private int currentHealth;
+    private Animator animator;
     [SerializeField] private TextMeshProUGUI vidasText;
-    [SerializeField] private Button resetButton;
+    public UnityEvent OnPlayerDeath;
+
+    private void Awake()
+    {
+        animator = GetComponentInChildren<Animator>();
+    }
 
     void Start()
     {
@@ -16,9 +20,18 @@ public class Player : MonoBehaviour
         UpdateHealthText();
     }
 
+    public void AddPoint()
+    {
+        AudioManager.Instance.PlayWih();
+        animator.Play("Pompi vida");
+    }
+
     public void AddHealth(int amount)
     {
         currentHealth += amount;
+        //AudioManager.Instance.PlayWih();
+        //animator.Play("Pompi vida");
+        AudioManager.Instance.PlayPop();
         if (currentHealth > Utils.Variables.MaxHealth)
         {
             currentHealth = Utils.Variables.MaxHealth;
@@ -29,17 +42,21 @@ public class Player : MonoBehaviour
     public void SubtractHealth(int amount)
     {
         currentHealth -= amount;
+        AudioManager.Instance.PlayAuch();
         if (currentHealth <= 0)
         {
+            animator.Play("Pompi muerte total");
             currentHealth = 0;
             GameOver();
         }
+        else 
+            animator.Play("Pompi muerte");
         UpdateHealthText();
     }
 
     private void GameOver()
     {
-        resetButton.gameObject.SetActive(true);
+        OnPlayerDeath.Invoke();
     }
 
     private void UpdateHealthText()
